@@ -40,13 +40,16 @@ def calculate_keyword_score(claim, keywords):
 
 # Generate automatic summary for a claim
 def generate_claim_summary(claim_text):
-    summary = summarizer(claim_text, max_length=15, min_length=5, do_sample=False)
+    summary = summarizer(claim_text, max_length=20, min_length=5, do_sample=False)
     return summary[0]['summary_text']
 
 # Generate a dynamic explanation using NER and a generative model
 def create_readable_explanation(matched_keywords, claim_text):
-    # Extract named entities to identify functions or key components in the claim
-    entities = ner(claim_text)
+    # Preprocess the claim text: simplify structure and remove special characters
+    claim_text_processed = claim_text.replace(";", ".").replace(":", ".").strip()
+
+    # Extract named entities using the NER model
+    entities = ner(claim_text_processed)
     entity_descriptions = []
 
     for entity in entities:
@@ -55,7 +58,7 @@ def create_readable_explanation(matched_keywords, claim_text):
         entity_type = entity['entity']
 
         # Only consider entities related to functionalities or components (e.g., labeled as ORG, MISC)
-        if entity_type in ["ORG", "MISC", "PRODUCT"]:
+        if entity_type in ["ORG", "MISC", "PRODUCT", "TECH", "PROCESS"]:
             # Use the generative model to describe the entity in context
             description = generator(f"Describe the functionality of {entity_text} in the context of {claim_text}", max_length=40)[0]['generated_text']
             entity_descriptions.append(description)

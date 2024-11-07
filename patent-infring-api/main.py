@@ -6,6 +6,9 @@ import sys,os
 from datetime import datetime
 from pymemcache.client import base
 from typing import List, Dict
+from sklearn.feature_extraction.text import TfidfVectorizer
+from collections import Counter
+import re
 
 PROJECT_ROOT = os.path.dirname(__file__)
 sys.path.insert(0, os.path.join(PROJECT_ROOT,'./basemodel'))
@@ -14,7 +17,7 @@ sys.path.insert(1, os.path.join(PROJECT_ROOT,'./llmmodel'))
 
 from request_body import AnlyzeRequest
 from ner_functions import RequestBody, ResponseBody, extract_initial_keywords, calculate_keyword_score, create_readable_explanation, analyze_claims,generate_claim_summary
-from llm_functions import analyze_claims_llm
+from llm_functions import analyze_claims_llm, perform_infringement_analysis_llm
 
 from sentence_transformers import SentenceTransformer, util
 
@@ -117,6 +120,29 @@ load_data_into_memcached()
 class AnalysisRequest(BaseModel):
     patent_id: str
     company_name: str
+
+# Helper function to extract specific features from the product description
+def extract_specific_features(description, claims):
+    # Tokenize and preprocess the description and claims
+    words_in_description = re.findall(r'\b\w+\b', description.lower())
+    feature_counter = Counter(words_in_description)
+
+    # Extract keywords from the claims text to match against the description
+    claim_keywords = set()
+    for claim in claims:
+        claim_text = claim['text']
+        words_in_claim = re.findall(r'\b\w+\b', claim_text.lower())
+        claim_keywords.update(words_in_claim)
+
+    # Find specific features in the description that match claim keywords
+    specific_features = [
+        word for word in claim_keywords if word in feature_counter and feature_counter[word] > 1
+    ]
+
+    # Return the top specific features
+    return specific_features[:10]  # Limit the number of features for readability
+
+
 # Helper function to perform infringement analysis
 def perform_infringement_analysis(patent, company):
     results = []
@@ -167,8 +193,11 @@ def perform_infringement_analysis(patent, company):
                 top_claims.append(claim_num)
                 # Generate explanation using NER and generative model
                 explanation = create_readable_explanation(matched_keywords, claim_text)
-                explanations.append(explanation) 
-                specific_features.append(generate_claim_summary(claim_text))
+                explanations.append(explanation)
+                # Extract specific features from the description
+                specific_features = extract_specific_features(description, patent_claims)
+                #specific_features.append(generate_claim_summary(claim_text))
+                
                 '''
                 explanations.append(
                     f"Claim {claim_num} matches product feature with similarity score {similarity_score:.2f}."
@@ -225,7 +254,7 @@ async def analyze_infringement(request: AnalysisRequest):
         raise HTTPException(status_code=404, detail="Company name not found")
 
     # Perform infringement analysis
-    result = perform_infringement_analysis(patent, company)
+    result = perform_infringement_analysis_llm(patent, company)
 
     return result
 
