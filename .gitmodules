@@ -1,0 +1,3 @@
+[submodule "patent-infring-web"]
+	path = patent-infring-web
+	url = https://github.com/SearocIsMe/patent-infring-web.git
