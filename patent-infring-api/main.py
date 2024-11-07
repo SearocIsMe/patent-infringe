@@ -33,7 +33,7 @@ class AnlyzeRequest(BaseModel):
 def queryAnalysis(analysis_id):
     print('Input analysisid:' , analysis_id)
     return {
-       "analysis_id": 123,
+       "analysis_id": "123",
        "patent_id": "abc-2312312",
        "company_name": "this is fake company",
        "analysis_date": "2024-10-31",
