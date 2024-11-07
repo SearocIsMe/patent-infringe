@@ -3,3 +3,9 @@ redis
 types-redis
 uvicorn
 pydantic
+pipeline
+scikit-learn
+transformers
+sentence-transformers
+openai==0.28
+pymemcache

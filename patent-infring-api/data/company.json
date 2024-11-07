@@ -1,0 +1,49 @@
+{
+  "companies": [
+    {
+      "name": "Walmart Inc.",
+      "products": [
+        {
+          "name": "Walmart Shopping App",
+          "description": "Mobile application with integrated shopping list and advertisement features"
+        },
+        {
+          "name": "Walmart+",
+          "description": "Membership program with smart shopping list synchronization"
+        },
+        {
+          "name": "Scan & Go",
+          "description": "Mobile app that allows adding items to list while scanning"
+        },
+        {
+          "name": "Walmart Pay",
+          "description": "Payment system with shopping list integration"
+        },
+        {
+          "name": "Item Finder",
+          "description": "In-store navigation app with shopping list features"
+        },
+        {
+          "name": "Walmart Grocery",
+          "description": "Grocery app with automated list building from ads"
+        },
+        {
+          "name": "Smart Shopping List",
+          "description": "AI-powered shopping list creator from weekly ads"
+        },
+        {
+          "name": "Store Map Integration",
+          "description": "Location-based shopping list organization system"
+        },
+        {
+          "name": "Quick Add from Ads",
+          "description": "Feature for adding items from digital advertisements"
+        },
+        {
+          "name": "List Share",
+          "description": "Collaborative shopping list platform"
+        }
+      ]
+    }
+ ]
+}
