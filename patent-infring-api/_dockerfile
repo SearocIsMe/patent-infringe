@@ -1,0 +1,39 @@
+FROM python:3.9 
+
+# Update the package list and install Memcached and Supervisor
+RUN apt-get update && apt-get install -y memcached supervisor && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Create the Supervisor configuration directory
+RUN mkdir -p /etc/supervisor/conf.d
+
+# Copy the Supervisor configuration file
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Expose the default Memcached port
+EXPOSE 11211
+
+# Start supervisord to manage Memcached and other processes
+# ENTRYPOINT ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
+# CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
+
+# switch to code folder
+WORKDIR /code
+COPY ./*.* /code/app/
+COPY ./basemodel /code/app/basemodel
+COPY ./llmmodel /code/app/llmmodel
+COPY ./nermodel /code/app/nermodel
+COPY ./data /code/app/data
+COPY ./requirements.txt /code/app/requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /code/app/requirements.txt && pip install "fastapi[standard]" 
+
+WORKDIR /code/app
+
+# Execute command
+RUN chmod 755 start.sh
+
+EXPOSE 8000 11211
+
+ENTRYPOINT ["bash", "-c", "./start.sh"]
+
+# CMD ["fastapi", "run", "main.py", "--port", "8000"]

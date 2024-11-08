@@ -14,6 +14,8 @@ from transformers import pipeline
 openai.api_key = "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"
 # Load Sentence-BERT model for similarity
 model = SentenceTransformer('all-MiniLM-L6-v2')
+# Initialize the summarization model
+summarizer = pipeline("summarization", model="t5-small")
 
 # Define request and response schemas
 class RequestBody(BaseModel):
@@ -27,8 +29,6 @@ class ResponseBody(BaseModel):
     abbreviated_summary: str
     explanation: str
 
-# Initialize the summarization model
-summarizer = pipeline("summarization", model="t5-small")
 
 '''
 def get_memcached():

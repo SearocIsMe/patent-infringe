@@ -15,12 +15,11 @@ import sys, os, time
 import hashlib
 import threading
 
-
-
 PROJECT_ROOT = os.path.dirname(__file__)
 sys.path.insert(0, os.path.join(PROJECT_ROOT,'./basemodel'))
 sys.path.insert(1, os.path.join(PROJECT_ROOT,'./nermodel'))
-sys.path.insert(1, os.path.join(PROJECT_ROOT,'./llmmodel'))
+sys.path.insert(2, os.path.join(PROJECT_ROOT,'./llmmodel'))
+sys.path.insert(3, os.path.join(PROJECT_ROOT,'./'))
 
 from common import CacheSetUp
 from request_body import AnlyzeRequest, SimpleAnalysisRequest
@@ -35,11 +34,10 @@ from llm_functions import (
     analyze_claims_llm, 
     perform_infringement_analysis_llm)
 
-app = FastAPI()
+# Start the FastAPI server
+app = FastAPI(swagger_ui_parameters={"syntaxHighlight.theme": "obsidian"})
 
-# Load Sentence-BERT model for text similarity
-model = SentenceTransformer('all-MiniLM-L6-v2')
-
+# for CORS-Origin 
 origins = [
     "http://127.0.0.1:8000",
     "http://localhost:8000",
@@ -53,9 +51,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Load Sentence-BERT model for text similarity
+model = SentenceTransformer('all-MiniLM-L6-v2')
+
 # Load data when the server starts
 cacheMgr = CacheSetUp()
-
 
 # Initialize a queue with a maximum size of 500
 QUEUE_MAX_SIZE = 500
@@ -103,7 +103,7 @@ def root():
     return {"message": "Hello World"}
 
 
-@app.get("/query/{analysis_id}")
+@app.get("/test/v1/query/{analysis_id}")
 def queryAnalysis(analysis_id):
     print('Input analysisid:' , analysis_id)
     return {
@@ -130,21 +130,21 @@ def queryAnalysis(analysis_id):
     }
 
 # for testing purpose
-@app.post("/analyze_test_ner", response_model=ResponseBody)
+@app.post("/test/v1/analyze_test_ner", response_model=ResponseBody)
 async def analyze_claims_ner_api(body: RequestBody):
     return analyze_claims(body)
 
 # for testing purpose
-@app.post("/analyze_test_llm", response_model=ResponseBody)
+@app.post("/test/v1//analyze_test_llm", response_model=ResponseBody)
 async def analyze_claims_llm_api(body: RequestBody):
     return analyze_claims_llm(body)
 
 
 # Endpoint for patent infringement analysis
-@app.post("/analyze_infringement", response_model=Dict)
+@app.post("/prod/v1/analyze_infringement", response_model=Dict)
 async def analyze_infringement(request: SimpleAnalysisRequest):
     # Generate a unique analysis ID based on hash
-    analysis_id = generate_hash_id(request.__dict__)
+    analysis_id = "None"
     # check if need to reload the source patent file.
     cacheMgr.reload(request.dataset_type)
 
@@ -169,7 +169,10 @@ async def analyze_infringement(request: SimpleAnalysisRequest):
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "error": "Company name not found"
         }
-    
+
+    # Generate a unique analysis ID based on hash
+    analysis_id = generate_hash_id(request.__dict__) 
+
     # Check if the queue has reached its maximum size
     if analysis_queue.full():
         return {
@@ -204,7 +207,7 @@ async def analyze_infringement(request: SimpleAnalysisRequest):
     }
 
 
-@app.get("/get_analysis_result/{analysis_id}", response_model=Dict)
+@app.get("/prod/v1/get_analysis_result/{analysis_id}", response_model=Dict)
 async def get_analysis_result(analysis_id: str):
     # Retrieve the analysis result from Memcached
     analysis_data = cacheMgr.getAnalysis(f"analysis:{analysis_id}")

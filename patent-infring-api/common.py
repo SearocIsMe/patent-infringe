@@ -5,12 +5,15 @@ import json, sys
 
 
 class CacheSetUp:
-    patends_loaded = False
-    companpy_loaded = False
 
+    # set the object expiring time is 7 in default.
+    TTL_DAY = 60 * 60 * 24 * 7
+
+    # the data source filepath for testing
     patent_test_file ='./data/patent_test.json' 
     company_test_file ='./data/company_test.json' 
 
+    # the data source filepath for demo
     patent_file ='./data/patents.json' 
     company_file ='./data/company_products.json' 
     
@@ -66,4 +69,4 @@ class CacheSetUp:
         return self.memcached_client.get(analysis_id)
     
     def set(self, analysis_id, json_body):
-        self.memcached_client.set(analysis_id, json_body)
+        self.memcached_client.set(analysis_id, json_body, self.TTL_DAY)
