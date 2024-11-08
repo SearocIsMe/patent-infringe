@@ -7,7 +7,7 @@ from transformers import pipeline
 from datetime import datetime
 from collections import Counter
 import numpy as np
-import uuid,json,re
+import json, re
 
 # Load models
 model = SentenceTransformer('all-MiniLM-L6-v2')
@@ -149,9 +149,9 @@ def extract_specific_features(description, claims):
 
 
 # Helper function to perform infringement analysis
-def perform_infringement_analysis(patent, company, fuzzy_logic_threshold, similarity_threshold, memcached_client):
+def perform_infringement_analysis(analysis_id, patent, company, fuzzy_logic_threshold, similarity_threshold, memcached_client):
     results = []
-    analysis_id = str(uuid.uuid4())
+    analysis_id = analysis_id
     date = datetime.now().strftime("%Y-%m-%d")
 
     # Parse the patent claims field correctly

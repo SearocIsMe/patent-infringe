@@ -6,10 +6,8 @@ from datetime import datetime
 from pymemcache.client import base
 import openai
 import numpy as np
-import uuid,json
+import json
 from transformers import pipeline
-
-
 
 
 # Configure OpenAI API key
@@ -172,9 +170,9 @@ def analyze_claims_llm(body: RequestBody):
 
 
 # Helper function to perform infringement analysis
-def perform_infringement_analysis_llm(patent, company, fuzzy_logic_threshold, similarity_threshold, memcached_client):
+def perform_infringement_analysis_llm(analysis_id, patent, company, fuzzy_logic_threshold, similarity_threshold, memcached_client):
     results = []
-    analysis_id = str(uuid.uuid4())
+    analysis_id = analysis_id
     date = datetime.now().strftime("%Y-%m-%d")
 
     # Parse the patent claims field correctly
