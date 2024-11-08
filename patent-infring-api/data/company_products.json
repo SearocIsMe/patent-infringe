@@ -1,0 +1,409 @@
+{
+  "companies": [
+    {
+      "name": "Walmart Inc.",
+      "products": [
+        {
+          "name": "Walmart Shopping App",
+          "description": "Mobile application with integrated shopping list and advertisement features"
+        },
+        {
+          "name": "Walmart+",
+          "description": "Membership program with smart shopping list synchronization"
+        },
+        {
+          "name": "Scan & Go",
+          "description": "Mobile app that allows adding items to list while scanning"
+        },
+        {
+          "name": "Walmart Pay",
+          "description": "Payment system with shopping list integration"
+        },
+        {
+          "name": "Item Finder",
+          "description": "In-store navigation app with shopping list features"
+        },
+        {
+          "name": "Walmart Grocery",
+          "description": "Grocery app with automated list building from ads"
+        },
+        {
+          "name": "Smart Shopping List",
+          "description": "AI-powered shopping list creator from weekly ads"
+        },
+        {
+          "name": "Store Map Integration",
+          "description": "Location-based shopping list organization system"
+        },
+        {
+          "name": "Quick Add from Ads",
+          "description": "Feature for adding items from digital advertisements"
+        },
+        {
+          "name": "List Share",
+          "description": "Collaborative shopping list platform"
+        }
+      ]
+    },
+    {
+      "name": "John Deere",
+      "products": [
+        {
+          "name": "S700 Combine Harvester",
+          "description": "Harvester with integrated stalk measurement system"
+        },
+        {
+          "name": "Operations Center",
+          "description": "Platform for analyzing harvest data including stalk metrics"
+        },
+        {
+          "name": "HarvestLab 3000",
+          "description": "Real-time crop analysis system"
+        },
+        {
+          "name": "ActiveYield",
+          "description": "Automatic yield calibration system"
+        },
+        {
+          "name": "Machine Sync",
+          "description": "Harvester coordination system with data integration"
+        },
+        {
+          "name": "StarFire 7000",
+          "description": "Precision guidance system with crop monitoring"
+        },
+        {
+          "name": "GreenStar",
+          "description": "Harvest monitoring and documentation system"
+        },
+        {
+          "name": "MyOperations",
+          "description": "Mobile app for harvest data management"
+        },
+        {
+          "name": "AutoTrac",
+          "description": "Automatic guidance system with crop sensing"
+        },
+        {
+          "name": "Harvest Smart",
+          "description": "Automated harvester control system"
+        }
+      ]
+    },
+    {
+      "name": "Husqvarna",
+      "products": [
+        {
+          "name": "Automower 450X",
+          "description": "Robotic lawn mower with solar charging capability"
+        },
+        {
+          "name": "Automower 435X AWD",
+          "description": "All-wheel drive robotic mower with smart features"
+        },
+        {
+          "name": "CEORA",
+          "description": "Commercial robotic mower with advanced features"
+        },
+        {
+          "name": "Automower Connect",
+          "description": "Smart control system for robotic mowers"
+        },
+        {
+          "name": "Fleet Services",
+          "description": "Commercial mower management platform"
+        },
+        {
+          "name": "Smart System",
+          "description": "Integrated lawn care automation platform"
+        },
+        {
+          "name": "Automower 550",
+          "description": "Professional robotic mower with advanced control"
+        },
+        {
+          "name": "Virtual Boundary",
+          "description": "Digital boundary system for robotic mowers"
+        },
+        {
+          "name": "Weather Timer",
+          "description": "Adaptive mowing schedule system"
+        },
+        {
+          "name": "Remote Management",
+          "description": "Professional fleet control system"
+        }
+      ]
+    },
+    {
+      "name": "CLAAS",
+      "products": [
+        {
+          "name": "JAGUAR 990",
+          "description": "Forage harvester with precision chopping system"
+        },
+        {
+          "name": "CEMOS AUTO",
+          "description": "Automatic machine optimization system"
+        },
+        {
+          "name": "TELEMATICS",
+          "description": "Fleet and harvest management system"
+        },
+        {
+          "name": "QUANTIMETER",
+          "description": "Continuous crop flow measurement system"
+        },
+        {
+          "name": "AUTO FILL",
+          "description": "Automatic filling system with monitoring"
+        },
+        {
+          "name": "CRUISE PILOT",
+          "description": "Automatic forward speed control"
+        },
+        {
+          "name": "DYNAMIC POWER",
+          "description": "Intelligent engine power management"
+        },
+        {
+          "name": "VISTA CAB",
+          "description": "Advanced operator control system"
+        },
+        {
+          "name": "MULTI CROP CRACKER",
+          "description": "Adjustable crop processing system"
+        },
+        {
+          "name": "CEMIS 700",
+          "description": "Terminal for machine optimization"
+        }
+      ]
+    },
+    {
+      "name": "Target Corporation",
+      "products": [
+        {
+          "name": "Target App",
+          "description": "Shopping app with list creation from circular ads"
+        },
+        {
+          "name": "Target Circle",
+          "description": "Rewards program with integrated shopping list"
+        },
+        {
+          "name": "Drive Up",
+          "description": "Curbside pickup with list management"
+        },
+        {
+          "name": "Target Wallet",
+          "description": "Payment system with shopping list integration"
+        },
+        {
+          "name": "Weekly Ad to List",
+          "description": "Feature for adding items from digital weekly ads"
+        },
+        {
+          "name": "Shopping List Plus",
+          "description": "Enhanced shopping list with deal integration"
+        },
+        {
+          "name": "myCheckout",
+          "description": "Mobile checkout system with list features"
+        },
+        {
+          "name": "Store Mode",
+          "description": "In-store navigation with list integration"
+        },
+        {
+          "name": "List Sharing",
+          "description": "Collaborative shopping list platform"
+        },
+        {
+          "name": "Smart Lists",
+          "description": "AI-powered shopping list recommendations"
+        }
+      ]
+    },
+    {
+      "name": "CNH Industrial (Case IH)",
+      "products": [
+        {
+          "name": "Axial-Flow 250 Series",
+          "description": "Combine harvester with yield monitoring"
+        },
+        {
+          "name": "AFS Connect",
+          "description": "Farm management platform with data analysis"
+        },
+        {
+          "name": "Harvest Command",
+          "description": "Automated harvest optimization system"
+        },
+        {
+          "name": "Field Analyzer",
+          "description": "Crop analysis and mapping system"
+        },
+        {
+          "name": "YieldTrak",
+          "description": "Real-time yield monitoring system"
+        },
+        {
+          "name": "AFS Pro 700",
+          "description": "Advanced display and control system"
+        },
+        {
+          "name": "xFill Premium",
+          "description": "Enhanced guidance system"
+        },
+        {
+          "name": "AFS Vector Pro",
+          "description": "Receiver with RTK capability"
+        },
+        {
+          "name": "AFS AccuGuide",
+          "description": "Automated steering system"
+        },
+        {
+          "name": "Field-IQ",
+          "description": "Crop input control system"
+        }
+      ]
+    },
+    {
+      "name": "Kroger Co.",
+      "products": [
+        {
+          "name": "Kroger App",
+          "description": "Shopping app with digital ad integration"
+        },
+        {
+          "name": "Kroger Pay",
+          "description": "Payment system with shopping list features"
+        },
+        {
+          "name": "Smart Way",
+          "description": "In-store navigation with list optimization"
+        },
+        {
+          "name": "Pickup",
+          "description": "Order management system with list features"
+        },
+        {
+          "name": "Digital Coupons",
+          "description": "Coupon system with list integration"
+        },
+        {
+          "name": "Weekly Ad List Builder",
+          "description": "Shopping list creation from weekly ads"
+        },
+        {
+          "name": "OptUP",
+          "description": "Nutrition app with shopping list features"
+        },
+        {
+          "name": "Smart Shopping List",
+          "description": "AI-powered list creation system"
+        },
+        {
+          "name": "Family Lists",
+          "description": "Shared shopping list platform"
+        },
+        {
+          "name": "Quick List",
+          "description": "Fast shopping list creation tool"
+        }
+      ]
+    },
+    {
+      "name": "AGCO Corporation",
+      "products": [
+        {
+          "name": "Fendt IDEAL",
+          "description": "Combine harvester with IDEALharvest system"
+        },
+        {
+          "name": "Fuse Connected Services",
+          "description": "Smart farming platform with data analysis"
+        },
+        {
+          "name": "Auto-Guide",
+          "description": "Automated guidance system"
+        },
+        {
+          "name": "TaskDoc Pro",
+          "description": "Documentation and data management system"
+        },
+        {
+          "name": "VarioDoc",
+          "description": "Machine data management system"
+        },
+        {
+          "name": "AgCommand",
+          "description": "Telemetry and fleet management"
+        },
+        {
+          "name": "FieldStar II",
+          "description": "Precision farming display"
+        },
+        {
+          "name": "Auto-Section Control",
+          "description": "Automatic section control system"
+        },
+        {
+          "name": "VarioGuide",
+          "description": "Steering system with RTK"
+        },
+        {
+          "name": "Yield Monitoring",
+          "description": "Real-time yield measurement system"
+        }
+      ]
+    },
+    {
+      "name": "iRobot",
+      "products": [
+        {
+          "name": "Terra Robot Mower",
+          "description": "Autonomous lawn mowing robot"
+        },
+        {
+          "name": "iRobot OS",
+          "description": "Operating system for robotic mowers"
+        },
+        {
+          "name": "Home App",
+          "description": "Smart control app for robotic devices"
+        },
+        {
+          "name": "Smart Map",
+          "description": "Lawn mapping and navigation system"
+        },
+        {
+          "name": "Virtual Wall",
+          "description": "Digital boundary system"
+        },
+        {
+          "name": "Schedule+",
+          "description": "Advanced scheduling system"
+        },
+        {
+          "name": "Clean Base",
+          "description": "Automatic charging system"
+        },
+        {
+          "name": "Smart Navigation",
+          "description": "Intelligent routing system"
+        },
+        {
+          "name": "Weather Guard",
+          "description": "Weather-adaptive mowing system"
+        },
+        {
+          "name": "Keep Out Zones",
+          "description": "Digital zone management system"
+        }
+      ]
+    }
+  ]
+}

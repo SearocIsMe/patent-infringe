@@ -10,7 +10,7 @@ import uuid,json
 from transformers import pipeline
 
 
-memcached_client = base.Client(('localhost', 11211))
+
 
 # Configure OpenAI API key
 openai.api_key = "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"
@@ -31,6 +31,27 @@ class ResponseBody(BaseModel):
 
 # Initialize the summarization model
 summarizer = pipeline("summarization", model="t5-small")
+
+'''
+def get_memcached():
+    return memcached_client 
+# Load and cache data into Memcached
+def load_data_into_memcached():
+    # Load patent source data
+    with open('./data/patent_source.json', 'r') as file:
+        patent_data = json.load(file)
+        for patent in patent_data:  # Iterate directly over the array of sub-JSONs
+            memcached_client.set(f"patent:{patent['publication_number']}", json.dumps(patent))
+    
+# Helper function to load company data directly from company.json
+def load_company_data(company_name):
+    with open('./data/company.json', 'r') as file:
+        company_data = json.load(file)
+        for company in company_data['companies']:
+            if company['name'].lower() == company_name.lower():
+                return company
+    return None
+'''
 
 # Function to summarize a list of explanations into a paragraph
 def summarize_explanations(explanations, max_length=150, min_length=50):
@@ -151,7 +172,7 @@ def analyze_claims_llm(body: RequestBody):
 
 
 # Helper function to perform infringement analysis
-def perform_infringement_analysis_llm(patent, company):
+def perform_infringement_analysis_llm(patent, company, fuzzy_logic_threshold, similarity_threshold, memcached_client):
     results = []
     analysis_id = str(uuid.uuid4())
     date = datetime.now().strftime("%Y-%m-%d")
@@ -164,8 +185,8 @@ def perform_infringement_analysis_llm(patent, company):
 
     products = company['products']
 
-    keyword_weight = 0.4
-    similarity_weight = 0.6
+    keyword_weight = fuzzy_logic_threshold
+    similarity_weight = similarity_threshold
 
     for product in products:
         description = product['description']
@@ -188,7 +209,6 @@ def perform_infringement_analysis_llm(patent, company):
 
             claim_embedding = model.encode(claim_text, convert_to_tensor=True)
             
-
             similarity_score = util.pytorch_cos_sim(description_embedding, claim_embedding).item()
 
             # Calculate keyword score
@@ -197,7 +217,7 @@ def perform_infringement_analysis_llm(patent, company):
             # Compute combined score
             combined_score = (keyword_weight * keyword_score) + (similarity_weight * similarity_score)
 
-            if  combined_score >= 0.5 and similarity_score > 0.6:  # Threshold for similarity (can be adjusted)
+            if  combined_score >= 0.5 and similarity_score > similarity_threshold:  # Threshold for similarity (can be adjusted)
                 top_claims.append(claim_num)
                 # Generate summary and explanation for relevant claims using GPT-3.5-turbo
                 claim_summary = generate_claim_summary(claim_text)

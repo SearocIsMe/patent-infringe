@@ -1,29 +1,34 @@
 from fastapi import FastAPI,HTTPException
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-import json,uuid
-import sys,os
 from datetime import datetime
 from pymemcache.client import base
 from typing import List, Dict
 from sklearn.feature_extraction.text import TfidfVectorizer
 from collections import Counter
-import re
+from sentence_transformers import SentenceTransformer, util
+import json,uuid,re
+import sys,os
 
 PROJECT_ROOT = os.path.dirname(__file__)
 sys.path.insert(0, os.path.join(PROJECT_ROOT,'./basemodel'))
 sys.path.insert(1, os.path.join(PROJECT_ROOT,'./nermodel'))
 sys.path.insert(1, os.path.join(PROJECT_ROOT,'./llmmodel'))
 
-from request_body import AnlyzeRequest
-from ner_functions import RequestBody, ResponseBody, extract_initial_keywords, calculate_keyword_score, create_readable_explanation, analyze_claims,generate_claim_summary
-from llm_functions import analyze_claims_llm, perform_infringement_analysis_llm
-
-from sentence_transformers import SentenceTransformer, util
-
+from common import CacheSetUp
+from request_body import AnlyzeRequest, SimpleAnalysisRequest
+from ner_functions import (
+    RequestBody, 
+    ResponseBody,
+    perform_infringement_analysis,
+    generate_claim_summary,
+    analyze_claims
+    )
+from llm_functions import (
+    analyze_claims_llm, 
+    perform_infringement_analysis_llm)
 
 app = FastAPI()
-memcached_client = base.Client(('localhost', 11211))
 
 # Load Sentence-BERT model for text similarity
 model = SentenceTransformer('all-MiniLM-L6-v2')
@@ -41,12 +46,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-'''
-class AnlyzeRequest(BaseModel):
-    patent_id: str
-    company_name: str
-    similarity_threshold: int
-'''
+
+# Load data when the server starts
+cacheMgr = CacheSetUp()
 
 @app.get("/")
 def root():
@@ -86,182 +88,47 @@ def analyze(request: AnlyzeRequest):
        "analysis_id": 123
        }
 
-@app.post("/analyze_claims_ner", response_model=ResponseBody)
+@app.post("/analyze_test_ner", response_model=ResponseBody)
 async def analyze_claims_ner_api(body: RequestBody):
     return analyze_claims(body)
 
-@app.post("/analyze_claims_llm", response_model=ResponseBody)
+@app.post("/analyze_test_llm", response_model=ResponseBody)
 async def analyze_claims_llm_api(body: RequestBody):
     return analyze_claims_llm(body)
 
 
-# Load and cache data into Memcached
-def load_data_into_memcached():
-    # Load patent source data
-    with open('./data/patent_source.json', 'r') as file:
-        patent_data = json.load(file)
-        for patent in patent_data:  # Iterate directly over the array of sub-JSONs
-            memcached_client.set(f"patent:{patent['publication_number']}", json.dumps(patent))
-    
-
-# Helper function to load company data directly from company.json
-def load_company_data(company_name):
-    with open('./data/company.json', 'r') as file:
-        company_data = json.load(file)
-        for company in company_data['companies']:
-            if company['name'].lower() == company_name.lower():
-                return company
-    return None
-
-# Load data when the server starts
-load_data_into_memcached()
-
-# Request body schema
-class AnalysisRequest(BaseModel):
-    patent_id: str
-    company_name: str
-
-# Helper function to extract specific features from the product description
-def extract_specific_features(description, claims):
-    # Tokenize and preprocess the description and claims
-    words_in_description = re.findall(r'\b\w+\b', description.lower())
-    feature_counter = Counter(words_in_description)
-
-    # Extract keywords from the claims text to match against the description
-    claim_keywords = set()
-    for claim in claims:
-        claim_text = claim['text']
-        words_in_claim = re.findall(r'\b\w+\b', claim_text.lower())
-        claim_keywords.update(words_in_claim)
-
-    # Find specific features in the description that match claim keywords
-    specific_features = [
-        word for word in claim_keywords if word in feature_counter and feature_counter[word] > 1
-    ]
-
-    # Return the top specific features
-    return specific_features[:10]  # Limit the number of features for readability
-
-
-# Helper function to perform infringement analysis
-def perform_infringement_analysis(patent, company):
-    results = []
-    analysis_id = str(uuid.uuid4())
-    date = datetime.now().strftime("%Y-%m-%d")
-
-    # Parse the patent claims field correctly
-    try:
-        patent_claims = json.loads(patent['claims'])
-    except json.JSONDecodeError:
-        raise HTTPException(status_code=500, detail="Error decoding patent claims")
-
-    products = company['products']
-
-    keyword_weight = 0.4
-    similarity_weight = 0.6
-
-    for product in products:
-        description = product['description']
-        top_claims = []
-        explanations = []
-        specific_features = []
-
-
-        for claim in patent_claims:
-            claim_num = claim['num']
-            claim_num.lstrip("0")
-            claim_text = claim['text']
-
-            claim_array = []
-            claim_array.append(claim_text);
-            # Dynamically generate initial keywords from claims
-            initial_keywords = extract_initial_keywords(claim_array)
-            print(f"Initial Keywords Extracted: {initial_keywords}")
-
-            claim_embedding = model.encode(claim_text, convert_to_tensor=True)
-            description_embedding = model.encode(description, convert_to_tensor=True)
-
-            similarity_score = util.pytorch_cos_sim(description_embedding, claim_embedding).item()
-
-            # Calculate keyword score
-            keyword_score, matched_keywords = calculate_keyword_score(claim_text, initial_keywords)
-
-            # Compute combined score
-            combined_score = (keyword_weight * keyword_score) + (similarity_weight * similarity_score)
-
-            if  combined_score >= 0.5 and similarity_score > 0.6:  # Threshold for similarity (can be adjusted)
-                top_claims.append(claim_num)
-                # Generate explanation using NER and generative model
-                explanation = create_readable_explanation(matched_keywords, claim_text)
-                explanations.append(explanation)
-                # Extract specific features from the description
-                specific_features = extract_specific_features(description, patent_claims)
-                #specific_features.append(generate_claim_summary(claim_text))
-                
-                '''
-                explanations.append(
-                    f"Claim {claim_num} matches product feature with similarity score {similarity_score:.2f}."
-                )
-                '''
-
-        if top_claims:
-            infringement_likelihood = "High" if len(top_claims) > 5 else "Moderate"
-            results.append({
-                "product_name": product['name'],
-                "infringement_likelihood": infringement_likelihood,
-                "relevant_claims": top_claims,
-                "explanation": " ".join(explanations),
-                "specific_features": specific_features  # Placeholder: replace with actual feature extraction if needed
-            })
-
-    # Sort and return top two products
-    results = sorted(results, key=lambda x: len(x['relevant_claims']), reverse=True)[:2]
-
-    overall_risk_assessment = (
-        "High risk of infringement due to implementation of core patent claims in multiple products."
-        if any(res['infringement_likelihood'] == "High" for res in results)
-        else "Moderate risk due to partial implementation of patented technology."
-    )
-
-    # Create result structure
-    analysis_result = {
-        "analysis_id": analysis_id,
-        "patent_id": patent['publication_number'],
-        "company_name": company['name'],
-        "analysis_date": date,
-        "top_infringing_products": results,
-        "overall_risk_assessment": overall_risk_assessment
-    }
-
-    # Store the result in Memcached
-    memcached_client.set(f"analysis:{analysis_id}", json.dumps(analysis_result))
-
-    return analysis_result
-
 # Endpoint for patent infringement analysis
 @app.post("/analyze_infringement", response_model=Dict)
-async def analyze_infringement(request: AnalysisRequest):
+async def analyze_infringement(request: SimpleAnalysisRequest):
+
+    # check if need to reload the source patent file.
+    cacheMgr.reload(request.dataset_type)
+
     # Retrieve patent data from Memcached
-    patent_data = memcached_client.get(f"patent:{request.patent_id}")
+    patent_data = cacheMgr.getPatent(f"patent:{request.patent_id}")
+
     if not patent_data:
         raise HTTPException(status_code=404, detail="Patent ID not found")
 
     patent = json.loads(patent_data)
 
     # Load company data directly from company.json
-    company = load_company_data(request.company_name)
+    company = cacheMgr.load_company_data(request.dataset_type, request.company_name)
     if not company:
         raise HTTPException(status_code=404, detail="Company name not found")
 
     # Perform infringement analysis
-    result = perform_infringement_analysis_llm(patent, company)
+    if  request.choose_gpt:
+        result = perform_infringement_analysis_llm(patent, company, request.fuzzy_logic_threshold, request.similarity_threshold, cacheMgr)
+    else :
+        result = perform_infringement_analysis(patent, company, request.fuzzy_logic_threshold, request.similarity_threshold, cacheMgr) 
 
     return result
 
 @app.get("/get_analysis_result/{analysis_id}", response_model=Dict)
 async def get_analysis_result(analysis_id: str):
     # Retrieve the analysis result from Memcached
-    analysis_data = memcached_client.get(f"analysis:{analysis_id}")
+    analysis_data = cacheMgr().getAnalysis(f"analysis:{analysis_id}")
     
     if not analysis_data:
         raise HTTPException(status_code=404, detail="Analysis result not found")
@@ -270,3 +137,4 @@ async def get_analysis_result(analysis_id: str):
     analysis_result = json.loads(analysis_data)
     
     return analysis_result
+
