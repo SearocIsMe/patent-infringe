@@ -194,3 +194,15 @@ By the command of docker run --- depicted from 3.2 section, the container is run
 The below picture shows the normal state of container which is initiated readily to response restful API call.
 ![alt text](./pic/run-inside-container.png)
 
+## 6. Improvement
+
+### Functional
+- Keyword-Based extraction is performer only once currently, try to iteraterly extract the keyword based filtering claims by 3 rounds, in order to get more accrurate keyword scores.
+- Try to use more accurate model to alter, all-MiniLM-L6-v model.
+- User highter version of OpenAI API, currently useing 0.28 version.
+
+
+### Engineering
+- Make parameters are configuable externally, like the OpenAI API key, models name, etc.
+- Analysis queue, turn it to thread-safe, unbounded tread-safe
+- Memcached, better provide persistenc storage like MySQL to store.
