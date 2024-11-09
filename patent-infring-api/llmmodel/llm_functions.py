@@ -4,10 +4,13 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sentence_transformers import SentenceTransformer, util
 from datetime import datetime
 from pymemcache.client import base
+from transformers import pipeline
 import openai
 import numpy as np
 import json
-from transformers import pipeline
+import logging
+
+logger = logging.getLogger(__name__) 
 
 
 # Configure OpenAI API key
@@ -28,28 +31,6 @@ class ResponseBody(BaseModel):
     combined_score: float
     abbreviated_summary: str
     explanation: str
-
-
-'''
-def get_memcached():
-    return memcached_client 
-# Load and cache data into Memcached
-def load_data_into_memcached():
-    # Load patent source data
-    with open('./data/patent_source.json', 'r') as file:
-        patent_data = json.load(file)
-        for patent in patent_data:  # Iterate directly over the array of sub-JSONs
-            memcached_client.set(f"patent:{patent['publication_number']}", json.dumps(patent))
-    
-# Helper function to load company data directly from company.json
-def load_company_data(company_name):
-    with open('./data/company.json', 'r') as file:
-        company_data = json.load(file)
-        for company in company_data['companies']:
-            if company['name'].lower() == company_name.lower():
-                return company
-    return None
-'''
 
 # Function to summarize a list of explanations into a paragraph
 def summarize_explanations(explanations, max_length=150, min_length=50):
@@ -203,7 +184,7 @@ def perform_infringement_analysis_llm(analysis_id, patent, company, fuzzy_logic_
             claim_array.append(claim_text);
             # Dynamically generate initial keywords from claims
             initial_keywords = extract_initial_keywords(claim_array)
-            print(f"Initial Keywords Extracted: {initial_keywords}")
+            logger.debug("Initial Keywords Extracted: {initial_keywords}")
 
             claim_embedding = model.encode(claim_text, convert_to_tensor=True)
             
@@ -222,11 +203,6 @@ def perform_infringement_analysis_llm(analysis_id, patent, company, fuzzy_logic_
                 explanation, no_specific_features = create_readable_explanation(matched_keywords, claim, description)
                 explanations.append(explanation) 
                 specific_features.append(claim_summary)
-                '''
-                explanations.append(
-                    f"Claim {claim_num} matches product feature with similarity score {similarity_score:.2f}."
-                )
-                '''
 
         if top_claims:
             infringement_likelihood = "High" if len(top_claims) > 5 else "Moderate"

@@ -8,8 +8,11 @@ from datetime import datetime
 from collections import Counter
 import numpy as np
 import json, re
+import logging
 
-# Load models
+logger = logging.getLogger(__name__) 
+
+# Load models, alternative: roberta-large-nli-stsb-mean-tokens, all-mpnet-base-v2
 model = SentenceTransformer('all-MiniLM-L6-v2')
 summarizer = pipeline("summarization", model="t5-small", max_length=30, min_length=5, do_sample=False)
 ner = pipeline("ner", model="dbmdz/bert-large-cased-finetuned-conll03-english")
@@ -82,7 +85,7 @@ def analyze_claims(body: RequestBody):
 
     # Dynamically generate initial keywords from claims
     initial_keywords = extract_initial_keywords(claims)
-    print(f"Initial Keywords Extracted: {initial_keywords}")
+    logger.debug(f"Initial Keywords Extracted: {initial_keywords}")
     
     keyword_weight = 0.4
     similarity_weight = 0.6
@@ -158,7 +161,7 @@ def perform_infringement_analysis(analysis_id, patent, company, fuzzy_logic_thre
     try:
         patent_claims = json.loads(patent['claims'])
     except json.JSONDecodeError:
-        raise HTTPException(status_code=500, detail="Error decoding patent claims")
+        logger.error("Error decoding patent claims")
 
     products = company['products']
 
@@ -181,7 +184,8 @@ def perform_infringement_analysis(analysis_id, patent, company, fuzzy_logic_thre
             claim_array.append(claim_text);
             # Dynamically generate initial keywords from claims
             initial_keywords = extract_initial_keywords(claim_array)
-            print(f"Initial Keywords Extracted: {initial_keywords}")
+            
+            logger.info(f"Initial Keywords Extracted: {initial_keywords}")
 
             claim_embedding = model.encode(claim_text, convert_to_tensor=True)
             description_embedding = model.encode(description, convert_to_tensor=True)
@@ -204,12 +208,6 @@ def perform_infringement_analysis(analysis_id, patent, company, fuzzy_logic_thre
                 # this method is not accurate to give the features out as NER has such limitation
                 # specific_features = extract_specific_features(description, patent_claims)
                 specific_features.append(generate_claim_summary(claim_text))
-                
-                '''
-                explanations.append(
-                    f"Claim {claim_num} matches product feature with similarity score {similarity_score:.2f}."
-                )
-                '''
 
         if top_claims:
             infringement_likelihood = "High" if len(top_claims) > 5 else "Moderate"

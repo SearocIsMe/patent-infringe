@@ -9,7 +9,7 @@ from collections import Counter
 from sentence_transformers import SentenceTransformer, util
 
 from queue import Queue
-
+import logging
 import json, uuid, re
 import sys, os, time
 import hashlib
@@ -33,6 +33,15 @@ from ner_functions import (
 from llm_functions import (
     analyze_claims_llm, 
     perform_infringement_analysis_llm)
+
+
+# setup loggers
+logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
+
+# get root logger
+logger = logging.getLogger(__name__)  # the __name__ resolve to "main" since we are at the root of the project. 
+                                      # This will get the root logger since no logger in the configuration has this name.
+
 
 # Start the FastAPI server
 app = FastAPI(swagger_ui_parameters={"syntaxHighlight.theme": "obsidian"})
@@ -75,23 +84,27 @@ def generate_hash_id(request_body: dict):
 # Worker function to process requests from the queue
 def process_analysis_requests():
     while True:
-        if not analysis_queue.empty():
-            request = analysis_queue.get()
-            try:
+        try:
 
-                # Perform infringement analysis
-                if  request['choose_gpt']:
-                    analysis_result = perform_infringement_analysis_llm(request['analysis_id'], request['patent'],
-                        request['company'], request['fuzzy_logic_threshold'], request['similarity_threshold'], cacheMgr)
-                else :
-                    analysis_result = perform_infringement_analysis(request['analysis_id'], request['patent'],
-                        request['company'], request['fuzzy_logic_threshold'], request['similarity_threshold'], cacheMgr)
+            if not analysis_queue.empty():
+                request = analysis_queue.get()
+                try:
 
-                cacheMgr.set(f"analysis:{request['analysis_id']}", json.dumps(analysis_result))
-            except Exception as e:
-                print(f"Error processing request {request['analysis_id']}: {e}")
-            analysis_queue.task_done()
-        time.sleep(5)  # Prevent high CPU usage
+                    # Perform infringement analysis
+                    if  request['choose_gpt']:
+                        analysis_result = perform_infringement_analysis_llm(request['analysis_id'], request['patent'],
+                            request['company'], request['fuzzy_logic_threshold'], request['similarity_threshold'], cacheMgr)
+                    else :
+                        analysis_result = perform_infringement_analysis(request['analysis_id'], request['patent'],
+                            request['company'], request['fuzzy_logic_threshold'], request['similarity_threshold'], cacheMgr)
+
+                    cacheMgr.set(f"analysis:{request['analysis_id']}", json.dumps(analysis_result))
+                except Exception as e:
+                    print(f"Error processing request {request['analysis_id']}: {e}")
+                analysis_queue.task_done()
+            time.sleep(5)  # Prevent high CPU usage
+        except:
+            logger.error("exception cause in process_analysis_requests()")
 
 # Start the worker thread
 worker_thread = threading.Thread(target=process_analysis_requests, daemon=True)
@@ -100,6 +113,7 @@ worker_thread.start()
 
 @app.get("/")
 def root():
+    logger.info("logging from the root logger")
     return {"message": "Hello World"}
 
 

@@ -141,6 +141,7 @@ This backend has used two methods to conduct the infringment analysis. One is NE
 
 2) **Embedding the Feature Description and Claims:**
     - The SentenceTransformer model encodes both the feature description and the filtered claims into embeddings that capture their semantic meaning.
+      "all-MiniLM-L6-v2" is currrently used, roberta-large-nli-stsb-mean-tokens, all-mpnet-base-v2 are alternvatives
 3) **Calculating Similarity Scores:**
     - Cosine similarity is calculated between the feature description and each claim. This gives us a similarity score for each comparison.
     - In the NER model, code will calculate the cosine similarity score for each claim using Sentence-BERT, which provides a measure of semantic similarity between the feature description and each claim.
@@ -151,11 +152,12 @@ This backend has used two methods to conduct the infringment analysis. One is NE
     - Claims with a combined score above the defined threshold (e.g., 0.7) are considered relevant. threshold can be adjusted based on how strict or lenient you want the comparison to be.
 6) **Displaying Results:**
     - The relevant claims are displayed with their similarity scores, making it easy to identify which claims may potentially overlap with your feature.
-    - Summarizes Key Matching Information
+    - Summarizes Key Matching Information (t5-small model is used)
       - For each claim that meets the similarity threshold, we’ll output a summary statement explaining why it was selected, based on its similarity score and keyword match.
 
 ### 4.2 Named Entity Recognition (NER)
 Use Named Entity Recognition (NER): Using a pre-trained NER model can help identify key entities within each claim (e.g., product features, functions, etc.). We can extract entities related to functions or actions and then summarize them with a generative model.
+Model of "dbmdz/bert-large-cased-finetuned-conll03-english" is used.
 
   ```md
   # Sentence Transformation
