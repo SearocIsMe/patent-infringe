@@ -8,7 +8,16 @@ g { color: Green }
 </style>
 
 This Patent-infring-API is backend service in python code. 
-It provides the Restful APIs for front-end to consume.
+It provides the Restful APIs for front-end to consume, 1. request to analysis the patent infrigement, 2. query the analysis result.
+
+This module use many NLP technicalogies, and LLM models.
+
+The advanced point is that this module has used Fuzzy logic algo to improve the similarity score.
+Here’s how the implementation fo  fuzzy logic:
+- Keyword Presence Score: Give points for each matching keyword in the claim. refer to 4.1 1)
+- Cosine Similarity Score: Use Sentence-BERT for semantic similarity. refer to 4.1 2~3)
+- Combined Score Calculation: Combine these scores to make a final relevance decision.
+- Use a weighted score that considers both the keyword match score and the cosine similarity score. 
 
 ## 1. API
 
@@ -27,14 +36,16 @@ It provides the Restful APIs for front-end to consume.
     "fuzzy_logic_threshold": 0,
     "similarity_threshold": 0
   }
+  ```
   Explaination:
-  <choose_gpt> True: use GPT API to conduct the analysis,otherwise use NER, dbmdz/bert-large-cased-finetuned-conll03-english model
-  <dataset_type> True: use full dataset for analysis,otherwise use test file whose size is smaller
-  <similarity_threshold> 
-  <fuzzy_logic_threshold> to compute the similarity of claim, the weighted keyword matching score need to be considered to compute.
+  - <choose_gpt> True: use GPT API to conduct the analysis,otherwise use NER, dbmdz/bert-large-cased-finetuned-conll03-english model
+  - <dataset_type> True: use full dataset for analysis,otherwise use test file whose size is smaller
+  - <similarity_threshold> juedge whether a product is infringeing to patene claim thourgh compare similarity score with this similarity_threshold.
+  - <fuzzy_logic_threshold> to compute the similarity of claim, the weighted keyword matching score need to be considered to compute.
   the formula is: combined_score = (fuzzy_logic_threshold * keyword_score) + (similarity_weight * similarity_score.item())
   combined_score is the final score to make decision if product's description is potentially infringed to some patent claim.
 
+  ```json
   response JSON Body:
   {
     "timestamp" : "2024-11-08 12:04:00",
